@@ -3,6 +3,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const newGameButton = document.getElementById('newGame');
     let currentPlayer = 'X';
     let gameState = Array(9).fill(null);
+    let worker = new Worker('gameWorker.js');
+
     const winningConditions = [
         [0, 1, 2],
         [3, 4, 5],
@@ -35,9 +37,17 @@ document.addEventListener('DOMContentLoaded', () => {
         if (gameState[index] === null) {
             gameState[index] = currentPlayer;
             event.target.textContent = currentPlayer;
-            saveGame(); // Guardar automáticamente después de cada movimiento
-            checkWinner();
-            currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
+
+            // Enviar el estado del juego al Web Worker
+            worker.postMessage(gameState);
+
+            worker.onmessage = function(e) {
+                // Actualizar el juego con la respuesta del Worker (simulado)
+                gameState = e.data;
+                saveGame();
+                checkWinner();
+                currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
+            };
         }
     }
 
